@@ -1,138 +1,174 @@
-# 📶 Airtel 5G Guardian
+# 🚀 Airtel 5G Guardian
 
-> Never lose your Airtel Unlimited 5G without knowing.
-
-Airtel 5G Guardian is a Python desktop utility that continuously monitors an Android phone's network connection using ADB. It detects when the phone switches between **5G** and **4G**, helping users avoid unintentionally consuming their daily mobile data.
-
-This project was built to solve a real-world problem. When using a phone as a hotspot, Airtel Unlimited 5G works only while the phone remains connected to a 5G network. If the signal drops to 4G, the daily data balance starts getting consumed. Airtel 5G Guardian immediately detects this change and alerts the user.
+> **A smart Windows desktop utility that monitors your Android hotspot's network status in real time and protects your Airtel Unlimited 5G data.**
 
 ---
 
-Why I Built This ?
-I frequently use my Android phone as a hotspot. Airtel provides unlimited data only while connected to 5G. When the network silently drops to 4G, my daily data gets consumed without me noticing. Existing tools didn't solve this specific problem, so I built Airtel 5G Guardian to monitor network changes in real time and alert me immediately.
+## 📖 Overview
 
----
-## ✨ Features
+**Airtel 5G Guardian** is a Python-based desktop application that continuously monitors your Android phone's network while it is being used as a hotspot.
 
-* 📡 Real-time 4G / 5G monitoring
-* 📱 Supports Android devices using ADB
-* 🌐 Wireless ADB support (no USB required after setup)
-* 🔔 Desktop notifications on network changes
-* 🔊 Sound alerts
-* 📝 Event logging
-* 🏗️ Modular project architecture
-* ⚡ Lightweight and easy to run
+If your phone silently switches from **5G** to **4G**, Guardian immediately alerts you through desktop notifications and sound alerts, helping you avoid unwanted consumption of your daily data quota.
+
+The application communicates directly with your Android device using **Android Debug Bridge (ADB)** and is designed with a modular architecture for future expansion.
 
 ---
 
-## 🛠️ Tech Stack
+# ✨ Features
 
-* Python 3.11+
-* Android Debug Bridge (ADB)
-* Plyer (Desktop Notifications)
-* Winsound (System Alerts)
-* Git
+## 📶 Real-Time Network Monitoring
+
+* Detects 5G and 4G transitions instantly
+* Monitors Android telephony information in real time
+* Prevents unnoticed data usage
 
 ---
 
-## 📂 Project Structure
+## 📡 Wireless ADB Support
+
+* Connects to your phone wirelessly
+* No USB cable required during normal monitoring
+* Automatic wireless connection on startup
+
+---
+
+## 🩺 Smart Recovery Mode (v0.2.0)
+
+If the saved wireless connection fails:
+
+* Automatically enters Recovery Mode
+* Waits for USB connection
+* Enables ADB TCP/IP mode
+* Detects the phone's latest hotspot IP
+* Updates the configuration automatically
+* Reconnects wirelessly
+* Resumes monitoring without restarting the application
+
+---
+
+## ⚙️ Configuration Management (v0.2.0)
+
+* Centralized `config.json`
+* ConfigManager for managing application settings
+* Easily configurable:
+
+  * ADB path
+  * Phone IP
+  * ADB port
+  * Check interval
+  * Reconnect settings
+  * Notification preferences
+
+---
+
+## 🔔 Notifications
+
+* Windows desktop notifications
+* Instant alerts for:
+
+  * Connected to 5G
+  * Switched to 4G
+
+---
+
+## 🔊 Sound Alerts
+
+Different sound notifications for:
+
+* 5G Connected
+* 4G Connected
+
+---
+
+## 📝 Event Logging
+
+Guardian records important events including:
+
+* Application Started
+* Monitoring Started
+* Connected to 5G
+* Switched to 4G
+* Recovery Mode
+* Monitoring Stopped
+
+---
+
+## 🏗️ Modular Architecture
 
 ```text
-Airtel-5G-Guardian/
+src/
 │
-├── run.py
-├── README.md
-├── requirements.txt
-├── .gitignore
+├── core/
+│   ├── adb_manager.py
+│   └── network_monitor.py
 │
-├── logs/
-├── assets/
-├── sounds/
+├── services/
+│   ├── logger.py
+│   ├── notifier.py
+│   └── sound_manager.py
 │
-└── src/
-    ├── config.py
-    ├── utils.py
-    ├── main.py
-    │
-    ├── core/
-    │   ├── adb_manager.py
-    │   └── network_monitor.py
-    │
-    └── services/
-        ├── logger.py
-        ├── notifier.py
-        └── sound_manager.py
+├── config.py
+└── main.py
 ```
 
 ---
 
-## 🚀 Getting Started
+# 🛠 Technologies
 
-### Clone the repository
-
-```bash
-git clone https://github.com/YOUR_USERNAME/Airtel-5G-Guardian.git
-```
-
-### Install dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-### Configure ADB
-
-Update the ADB path in `src/config.py`.
-
-### Start the application
-
-```bash
-python run.py
-```
+* Python 3.11
+* Android Debug Bridge (ADB)
+* Windows Notifications
+* JSON Configuration
+* Git & GitHub
 
 ---
 
-## 🧪 Current Status
+# 🚀 Current Version
 
-### Version 0.1.0
+## v0.2.0
 
-* ✅ Wireless ADB support
-* ✅ Accurate 4G/5G detection
-* ✅ Desktop notifications
-* ✅ Logging
-* ✅ Sound alerts
-* 🔄 More features under development
+### ✅ Completed
 
----
-
-## 🗺️ Roadmap
-
-* [ ] Automatic ADB reconnect
-* [ ] Modern GUI (CustomTkinter)
-* [ ] System tray integration
-* [ ] Daily usage statistics
-* [ ] Signal strength monitoring
-* [ ] Auto-start with Windows
-* [ ] One-click executable (.exe)
+* Real-time network monitoring
+* Wireless ADB support
+* Smart Recovery Mode
+* Automatic IP detection
+* Automatic configuration update
+* Desktop notifications
+* Sound alerts
+* Event logging
+* ConfigManager
+* Modular project architecture
 
 ---
 
-## 🤝 Contributing
+# 🗺️ Roadmap
 
-Contributions, suggestions, and feature requests are welcome.
+## v0.3.0
 
-Feel free to fork the repository and submit a pull request.
+* Modern GUI (CustomTkinter)
+* Live network dashboard
+* Settings window
+* Start/Stop monitoring
+* Dark mode
+
+## v0.4.0
+
+* Statistics dashboard
+* Network history
+* Export logs
+
+## v1.0.0
+
+* Windows installer
+* System tray integration
+* Auto startup
+* Production-ready release
 
 ---
 
-## 📄 License
-
-This project is licensed under the MIT License.
-
----
-
-## 👨‍💻 Author
+# 👨‍💻 Author
 
 **Macharla Bharath Kumar**
 
-Built with ❤️ to solve a real-world mobile hotspot problem.
+Building practical software to solve real-world problems while learning software engineering.

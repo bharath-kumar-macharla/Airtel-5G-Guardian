@@ -1,0 +1,22 @@
+{
+    "app": {
+        "name": "Airtel 5G Guardian",
+        "version": "0.3.0"
+    },
+    "adb": {
+        "path": "C:\\platform-tools\\platform-tools\\adb.exe",
+        "phone_ip": "10.144.150.253",
+        "port": 5555,
+        "reconnect_attempts": 5,
+        "reconnect_delay_seconds": 10
+    },
+    "monitor": {
+        "check_interval_seconds": 5
+    },
+    "notification": {
+        "timeout_seconds": 5
+    },
+    "log": {
+        "file": "logs/guardian.log"
+    }
+}

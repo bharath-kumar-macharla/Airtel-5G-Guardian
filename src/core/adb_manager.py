@@ -1,7 +1,7 @@
 """
 ADB Manager
 -----------
-v0.2.0 - Smart startup flow with polished Recovery Mode messages.
+v0.2.1 - Smart startup flow with polished Recovery Mode messages.
   1. Try last saved IP wirelessly.
   2. If fails → enter Recovery Mode (wait for USB indefinitely).
   3. USB detected → enable TCP/IP → read new IP → update config.json.

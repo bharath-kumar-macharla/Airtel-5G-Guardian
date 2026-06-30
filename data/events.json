@@ -362,5 +362,17 @@
         "type": "monitoring_stopped",
         "message": "Monitoring stopped",
         "session_id": "20260630123308"
+    },
+    {
+        "time": "2026-06-30T12:56:50",
+        "type": "monitoring_started",
+        "message": "Monitoring started",
+        "session_id": "20260630125650"
+    },
+    {
+        "time": "2026-06-30T12:57:30",
+        "type": "monitoring_stopped",
+        "message": "Monitoring stopped",
+        "session_id": "20260630125650"
     }
 ]

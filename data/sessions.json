@@ -138,5 +138,19 @@
         "switch_count": 0,
         "last_network": null,
         "last_change": "2026-06-30T12:33:08"
+    },
+    {
+        "id": "20260630125650",
+        "start": "2026-06-30T12:56:50",
+        "end": "2026-06-30T12:57:30",
+        "duration_seconds": 40,
+        "network_seconds": {
+            "5G": 0,
+            "4G": 0,
+            "UNKNOWN": 0
+        },
+        "switch_count": 0,
+        "last_network": null,
+        "last_change": "2026-06-30T12:56:50"
     }
 ]

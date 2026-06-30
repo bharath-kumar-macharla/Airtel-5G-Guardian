@@ -1,0 +1,15 @@
+Airtel 5G Guardian Report
+Date: 2026-06-30
+
+Monitoring time: 3m 49s
+5G active time: 2m 20s
+4G risk time: 54s
+Network switches: 2
+5G uptime: 61.1%
+Last 4G drop: 09:37 AM
+
+Timeline
+09:36 AM  Monitoring started
+09:37 AM  Network changed to 4G
+09:37 AM  Network changed to Unknown
+09:38 AM  Network changed to 5G

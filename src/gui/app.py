@@ -20,6 +20,7 @@ import customtkinter as ctk
 from src.config import ConfigManager, NETWORK_5G, NETWORK_4G
 from src.core.adb_manager import ADBManager
 from src.core.network_monitor import NetworkMonitor
+from src.services.analytics import GuardianAnalytics
 from src.services.logger import GuardianLogger
 from src.services.notifier import GuardianNotifier
 from src.services.sound_manager import SoundManager
@@ -40,6 +41,7 @@ class GuardianApp(ctk.CTk):
         self._monitor  = None
         self._logger   = GuardianLogger()
         self._notifier = GuardianNotifier()
+        self._analytics = GuardianAnalytics()
 
         # ── Thread state ──────────────────────────────────────────────────────
         self._running          = False
@@ -50,6 +52,7 @@ class GuardianApp(ctk.CTk):
         self._build_sidebar()
         self._build_main_area()   # builds header + content frame
         self._build_dashboard()   # built once, never destroyed
+        self._build_analytics()   # built once, never destroyed
         self._build_settings()    # built once, never destroyed
 
         # Show dashboard first
@@ -82,7 +85,7 @@ class GuardianApp(ctk.CTk):
         ctk.CTkFrame(sb, fg_color=BORDER, height=1, corner_radius=0).pack(fill="x", padx=P_SM, pady=(0, P_SM))
 
         self._nav_btns = {}
-        for key, label in [("dashboard", "⊞  Dashboard"), ("settings", "⚙  Settings")]:
+        for key, label in [("dashboard", "⊞  Dashboard"), ("analytics", "◌  Analytics"), ("settings", "⚙  Settings")]:
             btn = ctk.CTkButton(
                 sb, text=label, anchor="w",
                 fg_color="transparent", hover_color=BG_NAV_SEL,
@@ -108,11 +111,19 @@ class GuardianApp(ctk.CTk):
         # Show/hide panels — never destroy
         if key == "dashboard":
             self._page_title.configure(text="Dashboard")
+            self._analytics_panel.pack_forget()
             self._settings_panel.pack_forget()
             self._dashboard_panel.pack(fill="both", expand=True)
+        elif key == "analytics":
+            self._page_title.configure(text="Analytics")
+            self._dashboard_panel.pack_forget()
+            self._settings_panel.pack_forget()
+            self._refresh_analytics()
+            self._analytics_panel.pack(fill="both", expand=True)
         elif key == "settings":
             self._page_title.configure(text="Settings")
             self._dashboard_panel.pack_forget()
+            self._analytics_panel.pack_forget()
             self._refresh_settings_fields()   # always show current values
             self._settings_panel.pack(fill="both", expand=True)
 
@@ -225,6 +236,134 @@ class GuardianApp(ctk.CTk):
         val.pack(pady=(P_XS, P_SM), padx=P_SM)
         frame.update = lambda v, c: val.configure(text=v, text_color=c)
         return frame
+
+    # Analytics - v0.4.0 daily intelligence
+
+    def _build_analytics(self):
+        self._analytics_panel = ctk.CTkFrame(self._content, fg_color="transparent")
+
+        page = ctk.CTkFrame(self._analytics_panel, fg_color="transparent")
+        page.pack(fill="both", expand=True, padx=P, pady=P)
+
+        ctk.CTkLabel(page, text="Today Summary", font=F_TITLE, text_color=TEXT_PRIMARY).pack(anchor="w")
+
+        cards = ctk.CTkFrame(page, fg_color="transparent")
+        cards.pack(fill="x", pady=(P_SM, P_SM))
+
+        self._analytics_cards = {}
+        analytics_card_defs = [
+            ("monitoring", "MONITORING", "Time"),
+            ("five_g", "5G ACTIVE", "5G"),
+            ("four_g", "4G RISK", "4G"),
+            ("switches", "SWITCHES", "No."),
+            ("uptime", "5G UPTIME", "%"),
+            ("last_4g", "LAST 4G DROP", "Time"),
+        ]
+
+        for index, (key, label, icon) in enumerate(analytics_card_defs):
+            card = self._make_card(cards, label, icon)
+            row = index // 3
+            column = index % 3
+            card.grid(
+                row=row,
+                column=column,
+                sticky="nsew",
+                padx=(0 if column == 0 else P_SM, 0),
+                pady=(0 if row == 0 else P_SM, 0),
+            )
+            cards.columnconfigure(column, weight=1)
+            self._analytics_cards[key] = card
+
+        action_row = ctk.CTkFrame(page, fg_color=BG_CARD, corner_radius=RADIUS)
+        action_row.pack(fill="x", pady=(0, P_SM))
+
+        self._analytics_status = ctk.CTkLabel(
+            action_row,
+            text="Daily analytics refresh when this page opens.",
+            font=F_SMALL,
+            text_color=TEXT_MUTED,
+        )
+        self._analytics_status.pack(side="left", padx=P_SM)
+
+        ctk.CTkButton(
+            action_row,
+            text="Refresh",
+            fg_color=BTN_NEUTRAL,
+            hover_color=BORDER,
+            text_color=TEXT_SECONDARY,
+            font=F_SMALL,
+            height=30,
+            command=self._refresh_analytics,
+        ).pack(side="right", padx=(0, P_SM), pady=P_SM)
+
+        ctk.CTkButton(
+            action_row,
+            text="Export Report",
+            fg_color=BLUE,
+            hover_color="#2563eb",
+            text_color="white",
+            font=F_HEADING,
+            height=30,
+            command=self._export_analytics,
+        ).pack(side="right", padx=(0, P_SM), pady=P_SM)
+
+        timeline = ctk.CTkFrame(page, fg_color=BG_CARD, corner_radius=RADIUS)
+        timeline.pack(fill="both", expand=True)
+
+        timeline_hdr = ctk.CTkFrame(timeline, fg_color="transparent")
+        timeline_hdr.pack(fill="x", padx=P_SM, pady=(P_SM, 0))
+        ctk.CTkLabel(timeline_hdr, text="Network Timeline", font=F_HEADING, text_color=TEXT_PRIMARY).pack(side="left")
+        ctk.CTkFrame(timeline, fg_color=BORDER, height=1, corner_radius=0).pack(fill="x", padx=P_SM)
+
+        self._timeline_box = ctk.CTkTextbox(
+            timeline,
+            fg_color=BG_LOG,
+            text_color=TEXT_SECONDARY,
+            font=F_LOG,
+            corner_radius=8,
+            border_width=0,
+            wrap="word",
+            state="disabled",
+        )
+        self._timeline_box.pack(fill="both", expand=True, padx=P_SM, pady=P_SM)
+
+    def _refresh_analytics(self):
+        summary = self._analytics.today_summary()
+        updates = {
+            "monitoring": (self._analytics.format_duration(summary["monitoring_seconds"]), BLUE),
+            "five_g": (self._analytics.format_duration(summary["five_g_seconds"]), GREEN),
+            "four_g": (self._analytics.format_duration(summary["four_g_seconds"]), AMBER),
+            "switches": (str(summary["switch_count"]), TEAL),
+            "uptime": (f"{summary['uptime_percent']}%", GREEN if summary["uptime_percent"] >= 90 else AMBER),
+            "last_4g": (self._analytics.format_time(summary["last_4g_drop"]), AMBER),
+        }
+
+        for key, (value, color) in updates.items():
+            self._analytics_cards[key].update(value, color)
+
+        self._timeline_box.configure(state="normal")
+        self._timeline_box.delete("1.0", "end")
+        events = summary["events"]
+        if not events:
+            self._timeline_box.insert("end", "No events recorded today.\n")
+        else:
+            for event in events:
+                when = self._analytics.format_time(event.get("time"))
+                self._timeline_box.insert("end", f"{when}  {event.get('message', '')}\n")
+        self._timeline_box.configure(state="disabled")
+
+        self._analytics_status.configure(
+            text=f"{summary['sessions']} session(s) tracked today.",
+            text_color=TEXT_MUTED,
+        )
+
+    def _export_analytics(self):
+        report_path, csv_path = self._analytics.export_today_report()
+        self._analytics_status.configure(
+            text=f"Exported: {report_path.name} and {csv_path.name}",
+            text_color=GREEN,
+        )
+        self._log(f"Analytics exported to {report_path} and {csv_path}", "green")
 
     # ── Settings — built once, lives forever ──────────────────────────────────
 
@@ -485,6 +624,7 @@ class GuardianApp(ctk.CTk):
         self._verify_running = False
 
         self._running = True
+        self._analytics.start_session()
         self._monitor = NetworkMonitor()  # fresh monitor — clears previous_status
 
         self._set_buttons(monitoring=True)
@@ -496,6 +636,7 @@ class GuardianApp(ctk.CTk):
 
     def _stop(self):
         self._running = False
+        self._analytics.end_session()
         self._adb.disconnect()
         self._update_dot("⬤  Stopped", RED)
         self._update_card("device_card",  "—", TEXT_MUTED)
@@ -503,6 +644,7 @@ class GuardianApp(ctk.CTk):
         self._update_card("adb_card",     "—", TEXT_MUTED)
         self._set_buttons(monitoring=False)
         self._log("Monitoring stopped.", "muted")
+        self._refresh_analytics()
 
     # ── Monitor loop ──────────────────────────────────────────────────────────
 
@@ -525,6 +667,7 @@ class GuardianApp(ctk.CTk):
             self._update_card("device_card", "Failed", RED)
             self._set_buttons(monitoring=False)
             self._running = False
+            self._analytics.end_session()
             return
 
         self._log(f"✓ Connected to {self._adb._target}", "green")
@@ -554,6 +697,7 @@ class GuardianApp(ctk.CTk):
                 changed, network = self._monitor.has_changed()
 
                 if changed:
+                    self._analytics.record_network_change(network)
                     now = datetime.now().strftime("%H:%M:%S")
                     self._update_card("change_card", now, TEAL)
 
@@ -582,6 +726,7 @@ class GuardianApp(ctk.CTk):
                 self._log(f"✗ Error: {e}", "red")
                 time.sleep(2)
 
+        self._analytics.end_session()
         self._log("Monitoring ended.", "muted")
         self._set_buttons(monitoring=False)
         self._update_dot("⬤  Idle", TEXT_MUTED)
@@ -629,5 +774,6 @@ class GuardianApp(ctk.CTk):
     def _on_close(self):
         self._running        = False
         self._verify_running = False
+        self._analytics.end_session()
         self._adb.disconnect()
         self.destroy()

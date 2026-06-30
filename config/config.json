@@ -1,11 +1,11 @@
 {
     "app": {
         "name": "Airtel 5G Guardian",
-        "version": "0.3.0"
+        "version": "0.4.0"
     },
     "adb": {
         "path": "C:\\platform-tools\\platform-tools\\adb.exe",
-        "phone_ip": "10.144.150.253",
+        "phone_ip": "10.150.153.143",
         "port": 5555,
         "reconnect_attempts": 5,
         "reconnect_delay_seconds": 10

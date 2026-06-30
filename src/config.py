@@ -12,7 +12,7 @@ from pathlib import Path
 # ── Fallback constants (used only if config.json is missing) ──────────────────
 
 APP_NAME    = "Airtel 5G Guardian"
-APP_VERSION = "0.2.0"
+APP_VERSION = "0.4.0"
 
 ADB_PATH             = r"C:\platform-tools\platform-tools\adb.exe"
 CHECK_INTERVAL       = 5

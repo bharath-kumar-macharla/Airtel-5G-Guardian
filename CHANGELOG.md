@@ -6,6 +6,37 @@ This project follows a simple versioning approach where each release introduces 
 
 ---
 
+# v0.4.0 - Analytics & Reports Release
+
+## New Features
+
+### Network Analytics Dashboard
+
+* Added a dedicated Analytics page in the desktop app
+* Added daily summary cards for Monitoring Time, 5G Active Time, 4G Risk Time, Network Switches, 5G Uptime, and Last 4G Drop
+
+### Session History
+
+* Tracks each monitoring session
+* Saves session start and end time
+* Calculates total duration
+* Calculates 5G, 4G, and unknown network time
+* Counts network switches per session
+
+### Network Timeline
+
+* Records monitoring start and stop events
+* Records every network change
+* Shows today's latest timeline events inside the app
+
+### Export Reports
+
+* Exports today's summary as a TXT report
+* Exports today's session history as a CSV file
+* Stores reports under `exports/`
+
+---
+
 # 🚀 v0.3.0 — Desktop GUI Release
 
 ## ✨ New Features
@@ -125,13 +156,6 @@ When the saved wireless IP fails:
 
 ## 🛣 Roadmap
 
-### v0.4.0
-
-* Network Analytics Dashboard
-* Session History
-* Daily Statistics
-* Charts & Visualizations
-* Export Reports
 
 ### v0.5.0
 

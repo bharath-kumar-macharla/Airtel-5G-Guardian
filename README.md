@@ -12,7 +12,7 @@ The application communicates directly with your Android device using **Android D
 
 Whenever your device switches from **5G** to **4G**, Guardian immediately notifies you through desktop notifications, sound alerts, and a live dashboard.
 
-Version **v0.3.0** introduces a modern desktop interface built with **CustomTkinter**, transforming Guardian from a command-line utility into a user-friendly desktop application.
+Version **v0.4.0** adds daily network intelligence with analytics, session history, timeline events, and exportable reports.
 
 ---
 
@@ -34,6 +34,19 @@ Version **v0.3.0** introduces a modern desktop interface built with **CustomTkin
 * Settings page
 * Live monitoring controls
 * Dark theme
+
+---
+
+## 📊 Network Analytics (New in v0.4.0)
+
+* Daily monitoring summary
+* 5G active time
+* 4G risk time
+* Network switch count
+* 5G uptime percentage
+* Last 4G drop time
+* Network timeline
+* TXT and CSV report exports
 
 ---
 
@@ -266,10 +279,16 @@ python run.py
 
 # 🚀 Current Version
 
-## v0.3.0
+## v0.4.0
 
 ### ✅ Completed
 
+* Network Analytics Dashboard
+* Today Summary Cards
+* Session History
+* Network Timeline
+* Daily Statistics
+* Export Reports
 * Modern Desktop GUI
 * Sidebar Navigation
 * Dashboard
@@ -286,26 +305,11 @@ python run.py
 
 ---
 
-# Known Limitations
-
-Current version may still have minor GUI synchronization issues during Start/Stop operations.
-
-These improvements are planned for future releases.
-
----
-
 # 🗺 Roadmap
-
-## v0.4.0
-
-* Network Analytics Dashboard
-* Session History
-* Daily Statistics
-* Charts
-* Export Reports
 
 ## v0.5.0
 
+* Charts and Visualizations
 * System Tray
 * Auto Start
 * Multi-device Support

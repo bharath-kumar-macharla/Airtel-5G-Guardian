@@ -6,7 +6,70 @@ This project follows a simple versioning approach where each release introduces 
 
 ---
 
-# v0.4.0 - Analytics & Reports Release
+# 🚀 v0.5.0 — Always Running, Always Protecting
+
+## ✨ New Features
+
+### System Tray Integration
+
+* Guardian now minimizes to the Windows system tray instead of closing
+* Tray menu: Start Monitoring, Stop Monitoring, Open Dashboard, Settings, Exit
+* Monitoring keeps running while minimized
+* Tray icon color reflects live status (idle / connecting / monitoring / disconnected / recovery)
+* New sidebar shortcut: "Minimize to Tray"
+
+### Launch with Windows
+
+* New Settings toggle: "Launch Guardian when Windows starts"
+* Registers Guardian under the current user's Run key (no admin rights required)
+* Boot-time launches start silently in the tray via `run_gui.py --minimized`
+
+### Smart Startup
+
+* New Settings toggle: "Auto-resume monitoring on launch"
+* When enabled, Guardian loads config, skips the placeholder IP, and resumes
+  monitoring automatically — no clicks required
+
+### Automatic Update Checker
+
+* Background check against GitHub releases shortly after launch
+* Shows a "🚀 vX.Y.Z Available" dialog with Download / Later
+* New Settings toggle: "Check for updates automatically"
+
+### Better Settings
+
+* Browse ADB button opens a file picker instead of hand-typing paths
+* Test Connection button verifies ADB reachability without saving
+* Full input validation before Save (numeric fields, ADB path existence)
+* Native dialogs for ✔ Settings Saved / ⚠ Invalid ADB Path / ❌ Device Not Found
+* New "Startup & Behavior" settings card with toggle switches
+
+### Better User Experience
+
+* Status vocabulary unified across the header dot, dashboard cards, and
+  tray icon: 🟢 Monitoring · 🟡 Connecting · 🔴 Disconnected · 🟠 Recovery Mode
+* Slim indeterminate progress bar during Connecting/Recovery instead of a
+  frozen-looking UI
+* Live Activity Log gained Search, Save (to .txt), and an Auto-scroll toggle
+
+### Stability Improvements
+
+* Shutdown now driven by a `threading.Event` — Stop/Exit interrupt sleeps
+  immediately instead of waiting out the check interval
+* `SoundManager` and `GuardianNotifier` no longer crash the app if their
+  OS backend is unavailable or playback/notify fails
+* System tray import failures (any platform/backend issue) degrade to
+  "tray unavailable" instead of crashing Guardian at startup
+
+### Project Structure
+
+* Added `src/system/` — `tray.py`, `startup.py`, `updater.py`
+* Removed dead/unused `src/gui/settings_window.py` (superseded by the
+  embedded Settings panel, referenced undefined theme constants)
+
+---
+
+# 🚀 v0.4.0 - Analytics & Reports Release
 
 ## New Features
 
@@ -155,14 +218,6 @@ When the saved wireless IP fails:
 ---
 
 ## 🛣 Roadmap
-
-
-### v0.5.0
-
-* System Tray Integration
-* Auto Start with Windows
-* Automatic Updates
-* Multi-device Support
 
 ### v1.0.0
 

@@ -12,7 +12,8 @@ from pathlib import Path
 # ── Fallback constants (used only if config.json is missing) ──────────────────
 
 APP_NAME    = "Airtel 5G Guardian"
-APP_VERSION = "0.4.0"
+APP_VERSION = "0.5.0"
+UPDATE_REPO = "your-github-username/Airtel-5G-Guardian"  # owner/name — set to enable update checks
 
 ADB_PATH             = r"C:\platform-tools\platform-tools\adb.exe"
 CHECK_INTERVAL       = 5
@@ -103,3 +104,35 @@ class ConfigManager:
     @property
     def log_file(self) -> str:
         return self._data.get("log", {}).get("file", LOG_FILE)
+
+    # ── system (v0.5.0) ──────────────────────────────────────────────────────
+
+    @property
+    def launch_on_startup(self) -> bool:
+        return self._data.get("system", {}).get("launch_on_startup", False)
+
+    @property
+    def start_minimized(self) -> bool:
+        return self._data.get("system", {}).get("start_minimized", False)
+
+    @property
+    def minimize_to_tray(self) -> bool:
+        return self._data.get("system", {}).get("minimize_to_tray", True)
+
+    @property
+    def auto_start_monitoring(self) -> bool:
+        """Smart Startup — resume monitoring automatically when Guardian opens."""
+        return self._data.get("system", {}).get("auto_start_monitoring", False)
+
+    @property
+    def check_for_updates(self) -> bool:
+        return self._data.get("system", {}).get("check_for_updates", True)
+
+    @property
+    def update_repo(self) -> str:
+        return self._data.get("system", {}).get("update_repo", UPDATE_REPO)
+
+    # ── raw access (used by Settings panel to persist system.* toggles) ────────
+
+    def raw(self) -> dict:
+        return self._data

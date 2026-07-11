@@ -1,4 +1,4 @@
-"""
+﻿"""
 Theme — v0.3.0
 All colors, fonts, and sizes in one place.
 Change the whole look here.
@@ -15,12 +15,14 @@ BG_INPUT       = "#1e2130"
 BG_NAV_SEL     = "#1e2338"
 BORDER         = "#2a2d42"
 
-GREEN          = "#00d26a"   # 5G
+GREEN          = "#00d26a"   # 5G / monitoring
 AMBER          = "#f59e0b"   # 4G
 RED            = "#ef4444"   # error / disconnected
-BLUE           = "#3b82f6"   # info / ADB / connecting
-PURPLE         = "#8b5cf6"   # recovery mode
+BLUE           = "#3b82f6"   # info / ADB
+PURPLE         = "#8b5cf6"   # legacy recovery accent (kept for compatibility)
 TEAL           = "#06b6d4"   # last change
+YELLOW         = "#eab308"   # connecting
+ORANGE         = "#f97316"   # recovery mode
 
 TEXT_PRIMARY   = "#f1f5f9"
 TEXT_SECONDARY = "#94a3b8"
@@ -32,6 +34,15 @@ BTN_STOP_FG    = "#ef4444"
 BTN_STOP_HV    = "#dc2626"
 BTN_NEUTRAL    = "#1e2338"
 BTN_NEUTRAL_HV = "#2a2d42"
+
+# Status → color map used by the header status dot and tray icon
+STATUS_COLORS = {
+    "monitoring":   GREEN,
+    "connecting":   YELLOW,
+    "disconnected": RED,
+    "recovery":     ORANGE,
+    "idle":         TEXT_MUTED,
+}
 
 # ── Fonts ─────────────────────────────────────────────────────────────────────
 

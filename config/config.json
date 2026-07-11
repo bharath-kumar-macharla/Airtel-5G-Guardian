@@ -1,11 +1,11 @@
 {
     "app": {
         "name": "Airtel 5G Guardian",
-        "version": "0.4.0"
+        "version": "0.5.0"
     },
     "adb": {
         "path": "C:\\platform-tools\\platform-tools\\adb.exe",
-        "phone_ip": "10.150.153.143",
+        "phone_ip": "10.181.38.44",
         "port": 5555,
         "reconnect_attempts": 5,
         "reconnect_delay_seconds": 10
@@ -18,5 +18,13 @@
     },
     "log": {
         "file": "logs/guardian.log"
+    },
+    "system": {
+        "launch_on_startup": false,
+        "start_minimized": false,
+        "minimize_to_tray": true,
+        "auto_start_monitoring": false,
+        "check_for_updates": true,
+        "update_repo": "your-github-username/Airtel-5G-Guardian"
     }
 }

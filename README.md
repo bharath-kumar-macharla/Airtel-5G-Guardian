@@ -12,7 +12,7 @@ The application communicates directly with your Android device using **Android D
 
 Whenever your device switches from **5G** to **4G**, Guardian immediately notifies you through desktop notifications, sound alerts, and a live dashboard.
 
-Version **v0.4.0** adds daily network intelligence with analytics, session history, timeline events, and exportable reports.
+Version **v0.4.0** added daily network intelligence with analytics, session history, timeline events, and exportable reports. Version **v0.5.0** makes Guardian a real background service: system tray integration, launch-with-Windows, smart startup, and an automatic update checker.
 
 ---
 
@@ -47,6 +47,19 @@ Version **v0.4.0** adds daily network intelligence with analytics, session histo
 * Last 4G drop time
 * Network timeline
 * TXT and CSV report exports
+
+---
+
+## 🛡️ Background Service Mode (New in v0.5.0)
+
+* System tray integration — closing the window minimizes to tray, monitoring keeps running
+* Tray menu: Start / Stop Monitoring, Open Dashboard, Settings, Exit
+* Launch Guardian automatically when Windows starts
+* Smart Startup — auto-resumes the last monitoring session with no clicks
+* Automatic update checker against GitHub releases
+* Settings: Browse ADB, Test Connection, full input validation
+* Unified status indicators (🟢 Monitoring · 🟡 Connecting · 🔴 Disconnected · 🟠 Recovery Mode)
+* Log search, save-to-file, and auto-scroll toggle
 
 ---
 
@@ -130,8 +143,9 @@ Airtel-5G-Guardian/
 
 assets/
 config/
+data/
+exports/
 logs/
-sounds/
 
 src/
 
@@ -141,13 +155,18 @@ src/
 │
 ├── gui/
 │   ├── app.py
-│   ├── settings_window.py
 │   └── theme.py
 │
 ├── services/
+│   ├── analytics.py
 │   ├── logger.py
 │   ├── notifier.py
 │   └── sound_manager.py
+│
+├── system/
+│   ├── tray.py
+│   ├── startup.py
+│   └── updater.py
 │
 ├── config.py
 ├── main.py
@@ -214,6 +233,10 @@ pip install -r requirements.txt
 * Android Phone
 * Android Platform Tools (ADB)
 
+System tray integration uses `pystray` + `Pillow` (see `requirements.txt`).
+If either is missing, Guardian degrades gracefully — the window simply
+closes on the (X) button instead of minimizing to tray.
+
 ---
 
 # ⚙ Initial Configuration
@@ -279,10 +302,17 @@ python run.py
 
 # 🚀 Current Version
 
-## v0.4.0
+## v0.5.0
 
 ### ✅ Completed
 
+* System Tray Integration
+* Launch with Windows
+* Smart Startup (auto-resume monitoring)
+* Automatic Update Checker
+* Settings: Browse ADB, Test Connection, input validation
+* Unified status indicators + progress bar
+* Log search, save, and auto-scroll
 * Network Analytics Dashboard
 * Today Summary Cards
 * Session History
@@ -292,7 +322,6 @@ python run.py
 * Modern Desktop GUI
 * Sidebar Navigation
 * Dashboard
-* Settings Window
 * Theme Management
 * Controller Architecture
 * Real-Time Monitoring
@@ -307,20 +336,14 @@ python run.py
 
 # 🗺 Roadmap
 
-## v0.5.0
-
-* Charts and Visualizations
-* System Tray
-* Auto Start
-* Multi-device Support
-* Automatic Updates
-
 ## v1.0.0
 
 * Windows Installer
 * Production Release
 * Complete Documentation
 * Stable GUI Framework
+* Charts and Visualizations
+* Multi-device Support
 
 ---
 

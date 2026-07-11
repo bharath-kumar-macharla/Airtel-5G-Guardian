@@ -27,3 +27,9 @@ dist/
 
 # Windows
 Thumbs.db
+
+# Dynamic Data
+data/
+
+# Exports
+exports/

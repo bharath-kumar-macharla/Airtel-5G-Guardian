@@ -37,12 +37,18 @@ class ADBManager:
     # ── Internal runner ───────────────────────────────────────────────────────
 
     def _run(self, args: list, timeout: int = 10) -> tuple:
+        import sys
+        creationflags = 0
+        if sys.platform == "win32":
+            creationflags = subprocess.CREATE_NO_WINDOW
+
         try:
             result = subprocess.run(
                 [self._adb] + args,
                 capture_output=True,
                 text=True,
-                timeout=timeout
+                timeout=timeout,
+                creationflags=creationflags
             )
             return result.stdout.strip(), result.returncode
         except subprocess.TimeoutExpired:

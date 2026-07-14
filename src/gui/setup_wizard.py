@@ -206,10 +206,16 @@ class SetupWizard(ctk.CTkToplevel):
         target = f"{ip}:5555"
 
         def _run():
+            import sys
+            creationflags = 0
+            if sys.platform == "win32":
+                creationflags = subprocess.CREATE_NO_WINDOW
+
             try:
                 result = subprocess.run(
                     [adb, "connect", target],
                     capture_output=True, text=True, timeout=12,
+                    creationflags=creationflags
                 )
                 out = result.stdout.strip().lower()
                 connected = "connected" in out and "unable" not in out

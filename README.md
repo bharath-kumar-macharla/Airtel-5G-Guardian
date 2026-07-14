@@ -12,7 +12,7 @@ The application communicates directly with your Android device using **Android D
 
 Whenever your device switches from **5G** to **4G**, Guardian immediately notifies you through desktop notifications, sound alerts, and a live dashboard.
 
-Version **v0.4.0** added daily network intelligence with analytics, session history, timeline events, and exportable reports. Version **v0.5.0** makes Guardian a real background service: system tray integration, launch-with-Windows, smart startup, and an automatic update checker.
+Version **v0.4.0** added daily network intelligence with analytics, session history, timeline events, and exportable reports. Version **v0.5.0** introduced system tray integration, launch-with-Windows, smart startup, and an automatic update checker. Version **v1.0.0** is the first stable public release — production-ready, fully packaged, and completely documented.
 
 ---
 
@@ -47,6 +47,19 @@ Version **v0.4.0** added daily network intelligence with analytics, session hist
 * Last 4G drop time
 * Network timeline
 * TXT and CSV report exports
+
+---
+
+## 🚀 Production Release (New in v1.0.0)
+
+* First-launch setup wizard guides new users through configuration
+* About dialog with version info and GitHub link
+* Improved error messages with actionable connection failure guidance
+* Exit confirmation when monitoring is active
+* PyInstaller Windows EXE packaging support
+* Inno Setup Windows installer script
+* Complete documentation: INSTALLATION, USER_GUIDE, TROUBLESHOOTING, ROADMAP
+* MIT License
 
 ---
 
@@ -302,10 +315,16 @@ python run.py
 
 # 🚀 Current Version
 
-## v0.5.0
+## v1.0.0 — Stable Public Release
 
-### ✅ Completed
+### ✅ All Features
 
+* First-Launch Setup Wizard
+* About Dialog
+* Improved Error Messages
+* Exit Confirmation while Monitoring
+* PyInstaller EXE Packaging
+* Inno Setup Windows Installer
 * System Tray Integration
 * Launch with Windows
 * Smart Startup (auto-resume monitoring)
@@ -318,12 +337,11 @@ python run.py
 * Session History
 * Network Timeline
 * Daily Statistics
-* Export Reports
+* Export Reports (TXT + CSV)
 * Modern Desktop GUI
 * Sidebar Navigation
 * Dashboard
 * Theme Management
-* Controller Architecture
 * Real-Time Monitoring
 * Wireless ADB
 * Smart Recovery Mode
@@ -336,20 +354,43 @@ python run.py
 
 # 🗺 Roadmap
 
-## v1.0.0
+See [docs/ROADMAP.md](docs/ROADMAP.md) for the full roadmap.
 
-* Windows Installer
-* Production Release
-* Complete Documentation
-* Stable GUI Framework
-* Charts and Visualizations
-* Multi-device Support
+## v1.1.0
+
+* Custom branded app icon
+* Dark/Light theme toggle
+* Log file viewer
+* Notification sound customization
+
+## v1.2.0
+
+* Weekly analytics summary
+* Session detail view
+* Uptime streak tracking
+
+## v2.0.0
+
+* Multi-device support
+* Charts and visualizations
+* Network quality scoring
+
+# 📚 Documentation
+
+* [Installation Guide](docs/INSTALLATION.md)
+* [User Guide](docs/USER_GUIDE.md)
+* [Troubleshooting](docs/TROUBLESHOOTING.md)
+* [Roadmap](docs/ROADMAP.md)
+* [Changelog](CHANGELOG.md)
+* [Contributing](CONTRIBUTING.md)
 
 ---
 
 # 🤝 Contributing
 
 Suggestions, feature requests and pull requests are always welcome.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ---
 
@@ -364,3 +405,9 @@ Building practical software that solves real-world problems while learning softw
 ## ⭐ If you found this project interesting
 
 Consider giving the repository a ⭐ on GitHub.
+
+---
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).

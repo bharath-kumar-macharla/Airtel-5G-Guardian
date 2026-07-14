@@ -1,7 +1,9 @@
 """
 Guardian Analytics
 ------------------
-Stores monitoring sessions and network events, then builds daily summaries.
+v1.0.0 — Stores monitoring sessions and network events, then builds daily
+          summaries.  Uses get_data_path() so paths resolve correctly in
+          both source checkout and PyInstaller frozen builds.
 """
 
 import csv
@@ -9,16 +11,17 @@ import json
 from datetime import datetime, date
 from pathlib import Path
 
-from src.config import NETWORK_4G, NETWORK_5G, NETWORK_UNKNOWN
+from src.config import NETWORK_4G, NETWORK_5G, NETWORK_UNKNOWN, get_data_path
 
 
 class GuardianAnalytics:
 
     def __init__(self):
-        self._data_dir = Path("data")
-        self._exports_dir = Path("exports")
+        base = get_data_path()
+        self._data_dir    = base / "data"
+        self._exports_dir = base / "exports"
         self._sessions_file = self._data_dir / "sessions.json"
-        self._events_file = self._data_dir / "events.json"
+        self._events_file   = self._data_dir / "events.json"
         self._data_dir.mkdir(parents=True, exist_ok=True)
         self._exports_dir.mkdir(parents=True, exist_ok=True)
         self._active_session = None

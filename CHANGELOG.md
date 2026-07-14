@@ -6,6 +6,88 @@ This project follows a simple versioning approach where each release introduces 
 
 ---
 
+# 🎉 v1.0.0 — First Stable Public Release
+
+## ✨ New Features
+
+### About Dialog
+
+* New "ℹ About" button in the sidebar
+* Shows application name, version, developer, and description
+* GitHub Repository button opens the project page in your browser
+
+### First-Launch Setup Wizard
+
+* Shown automatically when `adb.exe` is not configured or not found
+* Steps: Browse for adb.exe → Enter phone IP → Test Connection → Save & Continue
+* Skip option navigates to Settings instead
+
+### Improved Error Messages
+
+* Connection failures now show a detailed list of possible causes:
+  * Hotspot is OFF
+  * Wireless ADB is disabled
+  * Phone IP has changed
+  * USB Debugging is disabled
+* Test Connection in Settings also shows the same actionable guidance on failure
+
+### Exit Confirmation
+
+* Attempting to exit while monitoring is active now shows a confirmation dialog
+* Prevents accidental monitoring interruption
+
+## 🐛 Bug Fixes
+
+### NetworkMonitor ADB Instance Fix
+
+* `NetworkMonitor` previously called the legacy module-level `get_telephony_dump()`
+  function which used a separate `ADBManager` instance from the one set up by
+  the GUI. This meant network checks used the default/old config even after
+  Settings were updated. Fixed by passing the GUI's own `ADBManager` instance
+  to `NetworkMonitor` at monitoring start.
+
+### ADB Manager Import-Time Singleton Removed
+
+* `adb_manager.py` previously instantiated `ConfigManager()` and `ADBManager()`
+  at module import time, causing a redundant config read on every import.
+  Legacy functions are now lazy-initialized on first call.
+
+## 📦 Packaging
+
+### PyInstaller EXE Support
+
+* Added `Airtel-5G-Guardian.spec` for one-file EXE builds
+* `get_base_path()` and `get_data_path()` helpers in `src/config.py` resolve
+  paths correctly both in source checkout and PyInstaller frozen builds
+* Analytics data directories use `get_data_path()` so they persist beside
+  the EXE between updates
+
+### Inno Setup Installer Script
+
+* Added `installer/Airtel5GGuardian.iss` (Inno Setup 6)
+* Creates Desktop shortcut (optional), Start Menu shortcut, and uninstaller
+* Per-user install — no administrator rights required
+* Installer installs application assets and creates writable data directories
+
+## 📄 Documentation
+
+* Added `LICENSE` (MIT)
+* Added `CONTRIBUTING.md`
+* Added `docs/INSTALLATION.md` — complete setup guide
+* Added `docs/USER_GUIDE.md` — full feature walkthrough
+* Added `docs/TROUBLESHOOTING.md` — common problems and fixes
+* Added `docs/ROADMAP.md` — v1.0.0 summary and future plans
+* Updated `README.md` — v1.0.0 features, docs links, license badge, roadmap
+
+## 🔧 Other Improvements
+
+* Version bumped to `1.0.0` in `src/config.py` and `config/config.json`
+* `UPDATE_REPO` corrected from placeholder to `bharath-kumar-macharla/Airtel-5G-Guardian`
+* `requirements.txt` now pins minimum versions for all runtime dependencies
+* `config.py` improved JSON parse error handling (catches `json.JSONDecodeError`)
+
+---
+
 # 🚀 v0.5.0 — Always Running, Always Protecting
 
 ## ✨ New Features

@@ -1,11 +1,16 @@
 """
 ADB Manager
 -----------
-v0.2.1 - Smart startup flow with polished Recovery Mode messages.
+v1.0.0 — Smart startup flow with polished Recovery Mode messages.
   1. Try last saved IP wirelessly.
   2. If fails → enter Recovery Mode (wait for USB indefinitely).
   3. USB detected → enable TCP/IP → read new IP → update config.json.
   4. Reconnect wirelessly → resume monitoring.
+
+Legacy module-level functions (run_adb_command, get_telephony_dump, etc.)
+are still present for the CLI path (run.py) but now lazy-initialize their
+internal singleton on first call instead of at import time — preventing a
+redundant ConfigManager load every time a module imports adb_manager.py.
 """
 
 import json
@@ -43,7 +48,16 @@ class ADBManager:
         except subprocess.TimeoutExpired:
             return "", 1
         except FileNotFoundError:
-            print(f"[ADB] ERROR: adb not found at → {self._adb}")
+            print(
+                f"[ADB] ERROR: adb.exe not found at → {self._adb}\n"
+                "[ADB] Open Settings and use Browse… to locate adb.exe."
+            )
+            return "", 1
+        except PermissionError as exc:
+            print(f"[ADB] ERROR: Permission denied running adb → {exc}")
+            return "", 1
+        except Exception as exc:  # noqa: BLE001
+            print(f"[ADB] ERROR: Unexpected error running adb → {exc}")
             return "", 1
 
     # ── Connection helpers ────────────────────────────────────────────────────
@@ -197,14 +211,24 @@ class ADBManager:
         return self.shell("dumpsys telephony.registry")
 
 
-# ── Legacy module-level functions ─────────────────────────────────────────────
+# ── Legacy module-level functions (CLI / run.py path) ─────────────────────────
+# These are lazy-initialized on first call so importing this module does
+# NOT trigger a ConfigManager read or subprocess spawn at import time.
 
-_config  = ConfigManager()
-_manager = ADBManager(_config)
+_legacy_manager = None
+
+
+def _get_legacy_manager() -> "ADBManager":
+    """Returns (and lazy-creates) the module-level ADB manager for the CLI."""
+    global _legacy_manager  # noqa: PLW0603
+    if _legacy_manager is None:
+        _legacy_manager = ADBManager(ConfigManager())
+    return _legacy_manager
 
 
 def run_adb_command(command):
-    stdout, code = _manager._run(command)
+    mgr = _get_legacy_manager()
+    stdout, code = mgr._run(command)
     return stdout if code == 0 else None
 
 
@@ -220,12 +244,12 @@ def get_connected_devices():
 
 
 def is_device_connected():
-    return _manager.is_connected()
+    return _get_legacy_manager().is_connected()
 
 
 def get_telephony_dump():
-    return _manager.get_telephony_dump()
+    return _get_legacy_manager().get_telephony_dump()
 
 
 def wait_for_device():
-    return _manager.ensure_connected()
+    return _get_legacy_manager().ensure_connected()

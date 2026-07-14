@@ -1,26 +1,22 @@
 """
-Airtel 5G Guardian — GUI v0.5.0
+Airtel 5G Guardian — GUI v1.0.0
 ---------------------------------
 "Always running. Always protecting."
 
-New in v0.5.0:
-  - System tray integration — closing the window minimizes to tray instead
-    of quitting; monitoring keeps running in the background.
-  - Launch with Windows (per-user registry Run key, no admin required).
-  - Smart Startup — on open, Guardian can auto-reconnect and resume the
-    last monitoring session without any clicks.
-  - Background update checker against GitHub releases.
-  - Settings: Browse ADB, Test Connection, input validation, and toggle
-    switches for all the new background behavior.
-  - Status dot / cards / tray icon all agree on one status vocabulary:
-    idle | connecting | monitoring | disconnected | recovery.
-  - A threading.Event drives shutdown so Stop/Exit interrupt sleeps
-    immediately instead of waiting out the check interval.
+New in v1.0.0:
+  - About dialog with GitHub link.
+  - First-launch setup wizard shown when adb.exe is not configured.
+  - Improved error messages: connection failures show actionable causes.
+  - Exit confirmation when monitoring is active.
+  - NetworkMonitor now uses the GUI's own ADBManager instance (bug fix).
+  - PyInstaller-compatible paths via get_base_path() in config.
 
-Design carried over from v0.4.0:
+Design carried over from v0.5.0:
   - Dashboard, Analytics and Settings panels are built ONCE and
     hidden/shown via pack/pack_forget — no destroy/rebuild TclErrors.
   - self._running guards prevent double-start.
+  - threading.Event drives shutdown so Stop/Exit interrupt sleeps
+    immediately instead of waiting out the check interval.
 """
 
 import json
@@ -33,7 +29,7 @@ from pathlib import Path
 import customtkinter as ctk
 from tkinter import filedialog, messagebox
 
-from src.config import ConfigManager, NETWORK_5G, NETWORK_4G
+from src.config import ConfigManager, NETWORK_5G, NETWORK_4G, get_base_path
 from src.core.adb_manager import ADBManager
 from src.core.network_monitor import NetworkMonitor
 from src.services.analytics import GuardianAnalytics
@@ -123,6 +119,9 @@ class GuardianApp(ctk.CTk):
         if start_minimized:
             self.after(50, self._minimize_to_tray)
 
+        # ── First-launch wizard ───────────────────────────────────────────────────
+        self.after(100, self._check_first_launch)
+
         # ── Smart Startup — resume monitoring automatically if configured ──────
         self.after(400, self._smart_startup)
 
@@ -167,6 +166,15 @@ class GuardianApp(ctk.CTk):
             self._nav_btns[key] = btn
 
         ctk.CTkFrame(sb, fg_color="transparent").pack(fill="y", expand=True)
+
+        # About button
+        ctk.CTkButton(
+            sb, text="ℹ  About", anchor="w",
+            fg_color="transparent", hover_color=BG_NAV_SEL,
+            text_color=TEXT_MUTED, font=F_SMALL,
+            corner_radius=8, height=30,
+            command=self._show_about,
+        ).pack(fill="x", padx=P_SM, pady=(0, 2))
 
         # Minimize-to-tray shortcut, always visible
         ctk.CTkButton(
@@ -790,10 +798,17 @@ class GuardianApp(ctk.CTk):
                     )
                     self._log(f"✓ Test connection succeeded → {probe.adb_target}", "green")
                 else:
-                    msg = f"❌ Device Not Found at {probe.adb_target}"
+                    msg = (
+                        f"❌ Could not connect to {probe.adb_target}\n\n"
+                        "Possible reasons:\n"
+                        "  • Hotspot is OFF on your phone\n"
+                        "  • Wireless ADB is disabled (Developer Options)\n"
+                        "  • Phone IP has changed — check phone’s hotspot settings\n"
+                        "  • USB Debugging is disabled"
+                    )
                     self._settings_status.configure(text=msg, text_color=RED)
                     messagebox.showerror("Device Not Found", msg)
-                    self._log(msg, "red")
+                    self._log(f"❌ Test connection failed → {probe.adb_target}", "red")
 
             self.after(0, _report)
 
@@ -992,6 +1007,109 @@ class GuardianApp(ctk.CTk):
                 pass
         self.after(0, _do)
 
+    # ── First-launch wizard ──────────────────────────────────────────────────
+
+    def _check_first_launch(self):
+        """
+        Show the setup wizard when adb.exe is missing or still set to the
+        factory default path that does not actually exist on this machine.
+        Skipped entirely when adb.exe exists at the configured path.
+        """
+        adb_path = Path(self._cfg.adb_path)
+        if adb_path.exists():
+            return  # Already configured — nothing to do.
+
+        # Lazy import to avoid circular dependency
+        from src.gui.setup_wizard import SetupWizard  # noqa: PLC0415
+
+        config_path = get_base_path() / "config" / "config.json"
+
+        def _on_wizard_complete():
+            # Reload config with the freshly saved values.
+            self._cfg = ConfigManager()
+            self._adb = ADBManager(self._cfg)
+            self._log("✓ Setup complete. Configuration saved.", "green")
+            self._log(f"Target: {self._cfg.adb_target}", "blue")
+
+        def _on_wizard_skip():
+            self._nav("settings")
+            self._log("⚠ Setup skipped. Open Settings to configure ADB and phone IP.", "amber")
+
+        wizard = SetupWizard(
+            master=self,
+            config_path=config_path,
+            on_complete=_on_wizard_complete,
+            on_skip=_on_wizard_skip,
+        )
+        wizard.focus_set()
+
+    # ── About dialog ──────────────────────────────────────────────────────────
+
+    def _show_about(self):
+        """Opens the About dialog."""
+        dialog = ctk.CTkToplevel(self)
+        dialog.title("About Airtel 5G Guardian")
+        dialog.geometry("400x320")
+        dialog.resizable(False, False)
+        dialog.configure(fg_color=BG_CONTENT)
+        dialog.transient(self)
+        dialog.grab_set()
+
+        # Header
+        hdr = ctk.CTkFrame(dialog, fg_color=BG_CARD, corner_radius=0, height=72)
+        hdr.pack(fill="x")
+        hdr.pack_propagate(False)
+        ctk.CTkLabel(hdr, text="📶", font=("Segoe UI Emoji", 28)).pack(side="left", padx=(P, P_SM))
+        col = ctk.CTkFrame(hdr, fg_color="transparent")
+        col.pack(side="left", pady=P_SM)
+        ctk.CTkLabel(col, text="Airtel 5G Guardian", font=F_TITLE, text_color=TEXT_PRIMARY).pack(anchor="w")
+        ctk.CTkLabel(col, text=f"Version {self._cfg.app_version}", font=F_SMALL, text_color=TEXT_MUTED).pack(anchor="w")
+
+        ctk.CTkFrame(dialog, fg_color=BORDER, height=1, corner_radius=0).pack(fill="x")
+
+        body = ctk.CTkFrame(dialog, fg_color="transparent")
+        body.pack(fill="both", expand=True, padx=P, pady=P)
+
+        ctk.CTkLabel(
+            body, text="Developer",
+            font=F_SMALL, text_color=TEXT_MUTED
+        ).pack(anchor="w", pady=(0, 2))
+        ctk.CTkLabel(
+            body, text="Macharla Bharath Kumar",
+            font=F_HEADING, text_color=TEXT_PRIMARY
+        ).pack(anchor="w", pady=(0, P_SM))
+
+        ctk.CTkLabel(
+            body, text="Description",
+            font=F_SMALL, text_color=TEXT_MUTED
+        ).pack(anchor="w", pady=(0, 2))
+        ctk.CTkLabel(
+            body,
+            text="Real-time Android hotspot monitoring with analytics and smart recovery.",
+            font=F_BODY, text_color=TEXT_SECONDARY, wraplength=340, justify="left"
+        ).pack(anchor="w", pady=(0, P))
+
+        ctk.CTkFrame(dialog, fg_color=BORDER, height=1, corner_radius=0).pack(fill="x")
+        btn_row = ctk.CTkFrame(dialog, fg_color=BG_CARD, corner_radius=0, height=52)
+        btn_row.pack(fill="x", side="bottom")
+        btn_row.pack_propagate(False)
+
+        ctk.CTkButton(
+            btn_row, text="Close",
+            fg_color=BTN_NEUTRAL, hover_color=BORDER,
+            text_color=TEXT_SECONDARY, font=F_SMALL, height=34,
+            command=dialog.destroy,
+        ).pack(side="left", padx=P, pady=P_SM)
+
+        ctk.CTkButton(
+            btn_row, text="💻  GitHub Repository",
+            fg_color=BLUE, hover_color="#2563eb",
+            text_color="white", font=F_HEADING, height=34,
+            command=lambda: webbrowser.open(
+                f"https://github.com/{self._cfg.update_repo}"
+            ),
+        ).pack(side="right", padx=P, pady=P_SM)
+
     # ── Start / Stop ──────────────────────────────────────────────────────────
 
     def _start(self):
@@ -1005,7 +1123,9 @@ class GuardianApp(ctk.CTk):
 
         self._running = True
         self._analytics.start_session()
-        self._monitor = NetworkMonitor()  # fresh monitor — clears previous_status
+        # Pass the GUI's own ADBManager so NetworkMonitor uses the same
+        # connection object (and the same adb.exe / IP) as the rest of the app.
+        self._monitor = NetworkMonitor(adb_manager=self._adb)
 
         self._set_buttons(monitoring=True)
         self._set_status("connecting")
@@ -1043,7 +1163,14 @@ class GuardianApp(ctk.CTk):
             connected = self._recovery_mode_gui()
 
         if not connected:
-            self._log("✗ Could not connect. Stopping.", "red")
+            self._log(
+                "✗ Could not connect to device. Possible causes:\n"
+                "  • Hotspot is OFF on your phone\n"
+                "  • Wireless ADB not enabled (Developer Options)\n"
+                "  • Phone IP has changed — check Settings\n"
+                "  • USB Debugging is disabled",
+                "red",
+            )
             self._set_status("disconnected")
             self._update_card("device_card", "Failed", RED)
             self._set_buttons(monitoring=False)
@@ -1259,6 +1386,15 @@ class GuardianApp(ctk.CTk):
     def _exit_app(self):
         """True shutdown — stops monitoring, tears down the tray icon, and
         closes the window. Only reachable via tray Exit or a disabled tray."""
+        if self._running:
+            answer = messagebox.askyesno(
+                "Exit Airtel 5G Guardian",
+                "Monitoring is currently active.\n\n"
+                "Are you sure you want to exit? Monitoring will stop.",
+            )
+            if not answer:
+                return
+
         self._running        = False
         self._verify_running = False
         self._stop_event.set()

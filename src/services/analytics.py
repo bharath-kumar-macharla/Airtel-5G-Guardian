@@ -237,7 +237,11 @@ class GuardianAnalytics:
         if not path.exists():
             return default
         try:
-            return json.loads(path.read_text(encoding="utf-8"))
+            content = json.loads(path.read_text(encoding="utf-8"))
+            if isinstance(content, list):
+                # Clean up any null/None or malformed data structures from past versions
+                return [item for item in content if item is not None and isinstance(item, dict)]
+            return content
         except json.JSONDecodeError:
             return default
 

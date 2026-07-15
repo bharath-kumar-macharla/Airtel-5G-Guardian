@@ -41,7 +41,7 @@ PrivilegesRequired      = lowest
 PrivilegesRequiredOverridesAllowed = dialog
 
 ; Visual
-SetupIconFile           = ..\assets\guardian.ico
+; SetupIconFile           = ..\assets\guardian.ico
 UninstallDisplayIcon    = {app}\{#AppExeName}
 UninstallDisplayName    = {#AppName}
 

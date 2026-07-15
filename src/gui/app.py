@@ -1244,8 +1244,22 @@ class GuardianApp(ctk.CTk):
     def _recovery_mode_gui(self) -> bool:
         self._log("══ Recovery Mode — Plug in USB cable ══", "orange")
 
+        last_state = None
         while self._running:
-            serial = self._adb._get_usb_device()
+            devices = self._adb._get_usb_devices_status()
+
+            serial = None
+            unauthorized_device = None
+            offline_device = None
+
+            for s, status in devices:
+                if status == "device":
+                    serial = s
+                    break
+                elif status == "unauthorized":
+                    unauthorized_device = s
+                elif status == "offline":
+                    offline_device = s
 
             if serial:
                 self._log(f"✓ USB detected → {serial}", "orange")
@@ -1272,7 +1286,24 @@ class GuardianApp(ctk.CTk):
 
                 self._log("✗ Wireless connect failed. Retrying...", "red")
                 self._stop_event.wait(3)
+                last_state = "retry"
             else:
+                if unauthorized_device:
+                    if last_state != "unauthorized":
+                        self._log("⚠ USB connected but UNAUTHORIZED. Allow USB Debugging on your phone screen.", "amber")
+                        self._update_card("adb_card", "Unauthorized", ORANGE)
+                        last_state = "unauthorized"
+                elif offline_device:
+                    if last_state != "offline":
+                        self._log("⚠ USB connected but OFFLINE. Try replugging USB cable.", "amber")
+                        self._update_card("adb_card", "Offline", ORANGE)
+                        last_state = "offline"
+                else:
+                    if last_state != "waiting":
+                        self._log("Waiting for USB connection...", "muted")
+                        self._update_card("adb_card", "Waiting USB...", ORANGE)
+                        last_state = "waiting"
+
                 self._stop_event.wait(3)
 
         return False

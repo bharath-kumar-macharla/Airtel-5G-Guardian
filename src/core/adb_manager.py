@@ -101,6 +101,22 @@ class ADBManager:
                     return serial
         return None
 
+    def _get_usb_devices_status(self) -> list[tuple[str, str]]:
+        """Returns list of (serial, status) for all USB connected devices."""
+        stdout, _ = self._run(["devices"])
+        devices = []
+        for line in stdout.splitlines()[1:]:
+            line = line.strip()
+            if not line:
+                continue
+            parts = line.split()
+            if len(parts) >= 2:
+                serial, status = parts[0], parts[1]
+                # Ignore wireless targets (which contain dots or colons)
+                if "." not in serial and ":" not in serial:
+                    devices.append((serial, status))
+        return devices
+
     def _enable_tcpip(self, serial: str) -> bool:
         """Enable wireless ADB mode on port 5555."""
         stdout, code = self._run(["-s", serial, "tcpip", "5555"], timeout=10)
@@ -112,7 +128,26 @@ class ADBManager:
         return False
 
     def _fetch_ip_via_usb(self, serial: str) -> str | None:
-        """Fetch phone's current hotspot IP via USB ADB."""
+        """Fetch phone's current hotspot IP via USB ADB by scanning interfaces."""
+        # 1. Try running ip addr show to scan all active interfaces
+        stdout, code = self._run(["-s", serial, "shell", "ip addr show"], timeout=10)
+        if code == 0 and stdout:
+            candidates = []
+            for line in stdout.splitlines():
+                if "inet " in line and "127.0.0.1" not in line:
+                    match = re.search(r"inet (\d+\.\d+\.\d+\.\d+)/", line)
+                    if match:
+                        ip = match.group(1)
+                        # Android hotspot IPs typically end in .1 (e.g. 192.168.43.1)
+                        if ip.endswith(".1"):
+                            print(f"  ✓ Hotspot IP detected via scan → {ip}")
+                            return ip
+                        candidates.append(ip)
+            if candidates:
+                print(f"  ✓ Alternative IP detected via scan → {candidates[0]}")
+                return candidates[0]
+
+        # 2. Fallback to querying specific interfaces individually if global show failed
         for interface in [self.HOTSPOT_INTERFACE, self.FALLBACK_INTERFACE]:
             stdout, code = self._run(
                 ["-s", serial, "shell", f"ip addr show {interface}"],
@@ -154,12 +189,26 @@ class ADBManager:
         """
         print_recovery_banner()
 
+        last_state = None
         dots = 0
         while True:
-            serial = self._get_usb_device()
+            devices = self._get_usb_devices_status()
+
+            serial = None
+            unauthorized_device = None
+            offline_device = None
+
+            for s, status in devices:
+                if status == "device":
+                    serial = s
+                    break
+                elif status == "unauthorized":
+                    unauthorized_device = s
+                elif status == "offline":
+                    offline_device = s
 
             if serial:
-                print(f"  ✓ USB device detected → {serial}\n")
+                print(f"\n  ✓ USB device detected → {serial}\n")
 
                 if not self._enable_tcpip(serial):
                     print("\n  Replug USB and try again.\n")
@@ -183,9 +232,20 @@ class ADBManager:
                     time.sleep(self.USB_POLL_INTERVAL)
                     continue
 
-            # No USB yet — animate waiting dots
-            dots = (dots % 3) + 1
-            print(f"\r  Waiting for USB{'.' * dots}   ", end="", flush=True)
+            # No USB yet
+            if unauthorized_device:
+                if last_state != "unauthorized":
+                    print("\n  ⚠ USB connected but UNAUTHORIZED. Allow USB Debugging on your phone screen.\n")
+                    last_state = "unauthorized"
+            elif offline_device:
+                if last_state != "offline":
+                    print("\n  ⚠ USB connected but OFFLINE. Try replugging USB cable.\n")
+                    last_state = "offline"
+            else:
+                last_state = "waiting"
+                dots = (dots % 3) + 1
+                print(f"\r  Waiting for USB{'.' * dots}   ", end="", flush=True)
+
             time.sleep(self.USB_POLL_INTERVAL)
 
     # ── Main connection entry point ───────────────────────────────────────────

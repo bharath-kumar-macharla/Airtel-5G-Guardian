@@ -64,13 +64,14 @@ Source: "..\config\config.json"; DestDir: "{app}\config"; Flags: onlyifdoesntexi
 
 ; Assets and sounds
 Source: "..\assets\*"; DestDir: "{app}\assets"; Flags: recursesubdirs createallsubdirs ignoreversion
-Source: "..\sounds\*"; DestDir: "{app}\sounds";  Flags: recursesubdirs createallsubdirs ignoreversion
+; Source: "..\sounds\*"; DestDir: "{app}\sounds";  Flags: recursesubdirs createallsubdirs ignoreversion
 
 [Dirs]
 ; Create writable user-data directories
 Name: "{app}\data"
 Name: "{app}\exports"
 Name: "{app}\logs"
+Name: "{app}\sounds"
 
 [Icons]
 ; Start Menu shortcut

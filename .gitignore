@@ -33,3 +33,6 @@ data/
 
 # Exports
 exports/
+
+# Packaging Output
+installer/Output/
